@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using static UnityEditor.Searcher.SearcherWindow.Alignment;
 using UnityEngine.InputSystem;
-using Unity.VisualScripting;
 
 public class PlayerMovement : MonoBehaviour
 {
