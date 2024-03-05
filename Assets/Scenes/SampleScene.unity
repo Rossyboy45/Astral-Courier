@@ -504,7 +504,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sensitivityX: 0.0035
   sensitivityY: 0.0035
-  orientation: {fileID: 962729511}
+  rb: {fileID: 1809352702}
 --- !u!1 &357889708
 GameObject:
   m_ObjectHideFlags: 0
@@ -3653,6 +3653,7 @@ MonoBehaviour:
     m_Bits: 8
   normalCollider: {fileID: 1809352706}
   crouchCollider: {fileID: 1809352707}
+  rb: {fileID: 1809352702}
 --- !u!136 &1809352706
 CapsuleCollider:
   m_ObjectHideFlags: 0

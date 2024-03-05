@@ -9,12 +9,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] LayerMask ground;
     [SerializeField] Collider normalCollider;
     [SerializeField] Collider crouchCollider;
+    [SerializeField] Rigidbody rb;
 
     //movement
     float xInput;
     float zInput;
     Vector3 moveDirection;
-    Rigidbody rb;
+    
 
     //Friction
     bool grounded;
@@ -38,7 +39,6 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
     }
 

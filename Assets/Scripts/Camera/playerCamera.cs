@@ -1,4 +1,5 @@
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,8 +9,8 @@ public class playerCamera : MonoBehaviour
     [SerializeField] float sensitivityY;
     float horizontal;
     float vertical;
-
-    [SerializeField] Transform orientation;
+    [SerializeField] Rigidbody rb;
+    
 
     float xRotation;
     float yRotation;
@@ -22,7 +23,7 @@ public class playerCamera : MonoBehaviour
 
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         //input gathering
         float mouseX = horizontal * sensitivityX;
@@ -33,7 +34,11 @@ public class playerCamera : MonoBehaviour
         
         //rotate camera and body
         transform.rotation = quaternion.Euler(xRotation, yRotation, 0);
-        orientation.rotation = quaternion.Euler(0,yRotation, 0);
+    }
+
+    private void FixedUpdate()
+    {
+        rb.MoveRotation(quaternion.Euler(0, yRotation, 0));
     }
 
     public void Look(InputAction.CallbackContext context)
