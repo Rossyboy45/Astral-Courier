@@ -25,12 +25,12 @@ public class playerCamera : MonoBehaviour
     void Update()
     {
         //input gathering
-        float mouseX = horizontal * Time.deltaTime * sensitivityX;
-        float mouseY = vertical * Time.deltaTime * sensitivityY;
+        float mouseX = horizontal * sensitivityX;
+        float mouseY = vertical * sensitivityY;
         xRotation -= mouseY;
         yRotation += mouseX;
         xRotation = Mathf.Clamp(xRotation, -1.3f, 1.25f);
-
+        
         //rotate camera and body
         transform.rotation = quaternion.Euler(xRotation, yRotation, 0);
         orientation.rotation = quaternion.Euler(0,yRotation, 0);

@@ -5,7 +5,10 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] Transform orientation;
+    [SerializeField] Transform groundPosition;
     [SerializeField] LayerMask ground;
+    [SerializeField] Collider normalCollider;
+    [SerializeField] Collider crouchCollider;
 
     //movement
     float xInput;
@@ -14,15 +17,23 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody rb;
 
     //Friction
-    float playerHeight;
     bool grounded;
-    float drag = 5;
-    float moveSpeed = 20;
+    float drag = 5f;
+    float moveSpeed= 15;
 
     //jumpuing
     float jumpForce = 8f;
     float AirMove = 0.3f;
     bool canJump = true;
+
+    //Crouch
+    float crouchSpeed = 7.5f;
+    float walkSpeed = 15f;
+
+    //slopeHandle
+    float maxSlopeAngle = 40;
+    RaycastHit slopeHit;
+    bool exitSlope;
 
     // Start is called before the first frame update
     void Start()
@@ -31,16 +42,27 @@ public class PlayerMovement : MonoBehaviour
         rb.freezeRotation = true;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.1f, ground);
+        grounded = Physics.Raycast(groundPosition.position, Vector3.down, 0.25f, ground);
         moveDirection = orientation.forward * zInput + orientation.right * xInput;
+
+        if (OnSlope() && !exitSlope)
+        {
+            rb.AddForce(MoveDirection() * moveSpeed * 10, ForceMode.Force);
+            if (rb.velocity.y > 0)
+            {
+                rb.AddForce(Vector3.down * 80f, ForceMode.Force);
+            }
+
+        }
         
         if (grounded == true) 
         {
             rb.drag = drag;
             canJump = true;
-            rb.AddForce(moveDirection.normalized * moveSpeed, ForceMode.Force);
+            exitSlope = false;
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10, ForceMode.Force);
         }
         else
         {
@@ -48,17 +70,45 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(moveDirection.normalized * moveSpeed * AirMove, ForceMode.Force);
         }
 
+        rb.useGravity = !OnSlope();
         SpeedControl();
+    }
+
+    public bool OnSlope()
+    {
+        if(Physics.Raycast(groundPosition.position,Vector3.down,out slopeHit, 0.25f))
+        {
+            float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            return angle < maxSlopeAngle && angle != 0;
+        }
+
+        return false;
+    }
+
+    private Vector3 MoveDirection()
+    {
+        return Vector3.ProjectOnPlane(moveDirection,slopeHit.normal).normalized;
     }
 
     private void SpeedControl()
     {
-        Vector3 maxSpeed = new Vector3(rb.velocity.x, 0f ,rb.velocity.z);
-
-        if (maxSpeed.magnitude > moveSpeed)
+        if (OnSlope() && !exitSlope)
         {
-            Vector3 limit = maxSpeed.normalized * moveSpeed;
-            rb.velocity = new Vector3(limit.x, rb.velocity.y, limit.z);
+            if(rb.velocity.magnitude > moveSpeed)
+            {
+                rb.velocity = rb.velocity.normalized * moveSpeed;
+            }
+        }
+
+        else 
+        {
+            Vector3 maxSpeed = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+            if (maxSpeed.magnitude > moveSpeed)
+            {
+                Vector3 limit = maxSpeed.normalized * moveSpeed;
+                rb.velocity = new Vector3(limit.x, rb.velocity.y, limit.z);
+            }
         }
     }
 
@@ -76,6 +126,24 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector3 (rb.velocity.x, 0, rb.velocity.z);
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
             canJump = false;
+            exitSlope = true;
         }
     }
+
+    public void Crouch(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            crouchCollider.enabled = true;
+            normalCollider.enabled = false;
+            moveSpeed = crouchSpeed;
+        }
+        else
+        {
+            normalCollider.enabled = true;
+            crouchCollider.enabled = false;
+            moveSpeed = walkSpeed;
+        }
+    }
+
 }
